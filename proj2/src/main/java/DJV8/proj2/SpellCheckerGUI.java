@@ -27,6 +27,7 @@ public class SpellCheckerGUI extends Application {
 	private String textFromFile;
 	private StringBuffer dialogBoxText;
 	
+	
 	public SpellCheckerGUI() {
 		dialogBoxText = new StringBuffer();
 	}
@@ -152,14 +153,16 @@ public class SpellCheckerGUI extends Application {
 		
 		MenuItem spellCheck = new MenuItem("Spell Check");
 		SpellCheckingAggregator spellCheckManager = new SpellCheckingAggregator();
+		
+		
 	    // When user click on the Exit item
 		spellCheck.setOnAction(new EventHandler<ActionEvent>() {
 
 	           @Override
 	           public void handle(ActionEvent event) {
-	        	   spellCheckManager.splitWordsFromFile(textFromFile);
-	        	   dialogBoxText = spellCheckManager.allSuggestedWords();
-	        	   if (!spellCheckManager.areThereIncorrectWords(textFromFile)) {
+	        	   String[] wordsFromFile = spellCheckManager.splitWordsFromFile(textArea.getText());
+	        	   dialogBoxText = spellCheckManager.allSuggestedWords(wordsFromFile);
+	        	   if (!spellCheckManager.areThereIncorrectWords(textFromFile, wordsFromFile)) {
 	        		   dialogBoxText.append("All words are spelled correctly");
 	        		   System.out.println(dialogBoxText.toString());
 	        		   Alert allClearAlert = new Alert(AlertType.CONFIRMATION);
@@ -177,7 +180,7 @@ public class SpellCheckerGUI extends Application {
 	        		   wordsToFix.setContentText(dialogBoxText.toString());
 	        		   wordsToFix.show();
 	        	   }
-	        	   
+	        	   spellCheckManager.clearBuffer();
 //	        	   System.out.println(textFromFile);
 	           }
 	       });

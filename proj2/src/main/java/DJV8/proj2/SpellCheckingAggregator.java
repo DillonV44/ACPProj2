@@ -6,9 +6,9 @@ import java.util.Set;
 
 public class SpellCheckingAggregator {
 	
-	private String[] wordsFromFile;
-	private ArrayList<String> incorrectWords;
-	private ArrayList<String> suggestions;
+	
+	
+	
 	private String correctSpelling;
 	private Set<String> set;
 	private DictionaryLoader dl;
@@ -19,8 +19,7 @@ public class SpellCheckingAggregator {
 	
 	public SpellCheckingAggregator() {
 		
-		suggestions = new ArrayList<>();
-		incorrectWords = new ArrayList<>();
+		
 		set = new HashSet<>();
 		dl = new DictionaryLoader();
 		set = dl.getDictionarySet();
@@ -29,18 +28,27 @@ public class SpellCheckingAggregator {
 		wordSuggestions = new StringBuffer();
 	}
 	
-	public void splitWordsFromFile(String inputString) {
+	public void clearBuffer() {
+		this.wordSuggestions.setLength(0);
+	}
+	
+	public String[] splitWordsFromFile(String inputString) {
+		
 		String removedItems = inputString.replaceAll("[\\.,]", "");
-		wordsFromFile = removedItems.split("\\s");
+		String[] wordsFromFile = removedItems.split("\\s");
 		for (int i = 0; i < wordsFromFile.length; i ++) {
 			wordsFromFile[i] = wordsFromFile[i].toLowerCase();
 		}
+		return wordsFromFile;
 
 	}
 	
-	public StringBuffer allSuggestedWords() {
+	public StringBuffer allSuggestedWords(String[] wordsFromFile) {
 		
 		ArrayList<String> returnedItems = new ArrayList<>();
+		ArrayList<String> incorrectWords = new ArrayList<>();
+		ArrayList<String> suggestions = new ArrayList<>();
+		
 		
 		for (int i = 0; i < wordsFromFile.length; i ++) {
 			if (!set.contains(wordsFromFile[i])) {
@@ -67,12 +75,7 @@ public class SpellCheckingAggregator {
 				correctSpelling = returnedItems.get(x);
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling); 
-					if (x == returnedItems.size() - 1) {
-						wordSuggestions.append(correctSpelling);
-					}
-					else {
-						wordSuggestions.append(correctSpelling + ", ");
-					}
+					wordSuggestions.append(correctSpelling + ", ");
 				}
 			}
 			
@@ -91,12 +94,7 @@ public class SpellCheckingAggregator {
 				
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling);
-					if (y == returnedItems.size() - 1) {
-						wordSuggestions.append(correctSpelling);
-					}
-					else {
-						wordSuggestions.append(correctSpelling + ", ");
-					}
+					wordSuggestions.append(correctSpelling + ", ");
 				}
 				
 			}
@@ -114,12 +112,7 @@ public class SpellCheckingAggregator {
 				
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling);
-					if (z == returnedItems.size() - 1) {
-						wordSuggestions.append(correctSpelling);
-					}
-					else {
-						wordSuggestions.append(correctSpelling + ", ");
-					}
+					wordSuggestions.append(correctSpelling + ", ");
 				}
 				
 			}
@@ -140,7 +133,7 @@ public class SpellCheckingAggregator {
 		return wordSuggestions;
 	}
 	
-	public boolean areThereIncorrectWords(String inputString) {
+	public boolean areThereIncorrectWords(String inputString, String[] wordsFromFile) {
 		boolean missspelledWords = false;
 		for (int i = 0; i < wordsFromFile.length; i ++) {
 			if (!set.contains(wordsFromFile[i])) {
