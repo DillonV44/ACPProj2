@@ -1,9 +1,16 @@
 package DJV8.proj2;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -11,18 +18,21 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class SpellCheckerGUI extends Application {
 	
 	private TextArea textArea;
+	private String textFromFile;
+	private StringBuffer dialogBoxText;
 	
+	public SpellCheckerGUI() {
+		dialogBoxText = new StringBuffer();
+	}
 	
 	@Override
 	public void start(Stage stage) {
-		BorderPane borderPane = new BorderPane();
-        
-		
 		// Create MenuBar
         MenuBar menuBar = new MenuBar();
  
@@ -48,10 +58,11 @@ public class SpellCheckerGUI extends Application {
         
         BorderPane root = new BorderPane();
         root.setTop(menuBar);
-        Scene scene = new Scene(root, 350, 200);
         
-        TextArea textArea = new TextArea();
-        root.setBottom(textArea);
+        Scene scene = new Scene(root, 600, 600);
+        
+        
+        root.setCenter(textArea);
         
         stage.setTitle("Spell Checker");
         stage.setScene(scene);
@@ -62,12 +73,31 @@ public class SpellCheckerGUI extends Application {
 	
 	private MenuItem openFileItem() {
 		MenuItem openFileItem = new MenuItem("Open File");
+		FileParser fileParser = new FileParser();
+		textFromFile = "";
+		textArea = new TextArea();
 		
 		openFileItem.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override 
 			public void handle(ActionEvent event) {
-				System.out.println("Chose the file-new item");
+				
+				FileChooser fileChooser = new FileChooser();
+                fileChooser.setInitialDirectory(new File(".")); 
+				// set to current didrectory                
+//                String sep = System.getProperty("file.separator");
+	//			fileChooser.setInitialDirectory(new File("c:"+sep+"users"+sep+"jcoffey"));
+                //Show open file dialog
+                File file = fileChooser.showOpenDialog(null);
+                if(file != null) {
+                  System.out.println(file.getPath());
+                  fileParser.setStringFromFile(file.getPath());
+                  textFromFile = fileParser.getStringFromFile();
+                  System.out.println(textFromFile);
+                  textArea.setWrapText(true);
+                  textArea.setText(textFromFile);
+                }
+                
 			}
 		});
 		return openFileItem;
@@ -81,7 +111,23 @@ public class SpellCheckerGUI extends Application {
 			
 			@Override
 			public void handle(ActionEvent event) {
-				System.out.println("Chose the file-open item");
+				FileChooser fileChooser = new FileChooser();
+				fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
+				fileChooser.setInitialDirectory(new File("./"));
+				fileChooser.setInitialFileName("saveFile.txt");
+				File file = fileChooser.showSaveDialog(null);
+
+				if (file != null) {
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(file);
+						System.out.println(textArea.getText().toString());
+						writer.println(textArea.getText().toString());
+						writer.close();
+					} catch (IOException ex) {
+						System.out.println(ex);
+					}
+				}
 			}
 		});
 		return saveFileItem;
@@ -103,13 +149,36 @@ public class SpellCheckerGUI extends Application {
     }
 	
 	private MenuItem analyzeSpellCheck() {
+		
 		MenuItem spellCheck = new MenuItem("Spell Check");
+		SpellCheckingAggregator spellCheckManager = new SpellCheckingAggregator();
 	    // When user click on the Exit item
 		spellCheck.setOnAction(new EventHandler<ActionEvent>() {
 
 	           @Override
 	           public void handle(ActionEvent event) {
-	        	   System.out.println("Spell Check");
+	        	   spellCheckManager.splitWordsFromFile(textFromFile);
+	        	   dialogBoxText = spellCheckManager.allSuggestedWords();
+	        	   if (!spellCheckManager.areThereIncorrectWords(textFromFile)) {
+	        		   dialogBoxText.append("All words are spelled correctly");
+	        		   System.out.println(dialogBoxText.toString());
+	        		   Alert allClearAlert = new Alert(AlertType.CONFIRMATION);
+	        		   allClearAlert.setTitle("Spell Checker");
+	        		   allClearAlert.setHeaderText("Good job");
+	        		   allClearAlert.setContentText("Nothing to fix");
+	        		   allClearAlert.show();
+	        	   }
+	        	   else {
+	        		   
+	        		   System.out.println(dialogBoxText.toString());
+	        		   Alert wordsToFix = new Alert(AlertType.CONFIRMATION);
+	        		   wordsToFix.setTitle("Spell Checker");
+	        		   wordsToFix.setHeaderText("Possible Corrections..");
+	        		   wordsToFix.setContentText(dialogBoxText.toString());
+	        		   wordsToFix.show();
+	        	   }
+	        	   
+//	        	   System.out.println(textFromFile);
 	           }
 	       });
 	       return spellCheck;
