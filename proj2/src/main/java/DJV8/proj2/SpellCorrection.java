@@ -6,15 +6,15 @@ import java.util.Set;
 
 public class SpellCorrection {
 	private String correctSpelling;
-	private Set<String> set;
+	private Set<String> dictionarySet;
 	private DictionaryLoader dl;
 	private StringBuffer newWord;
 	
 	public SpellCorrection() {
 		correctSpelling = "";
-		set = new HashSet<>();
+		dictionarySet = new HashSet<>();
 		dl = new DictionaryLoader();
-		set = dl.getDictionarySet();
+		dictionarySet = dl.getDictionarySet();
 		newWord = new StringBuffer();
 	}
 	
@@ -36,7 +36,7 @@ public class SpellCorrection {
 				
 				clearStringBuffer(inputString);
 				newWord.insert(i, letter);
-				if (set.contains(newWord.toString())) {
+				if (dictionarySet.contains(newWord.toString())) {
 					
 					correctSpelling = newWord.toString();
 					returnList.add(correctSpelling);
@@ -58,7 +58,7 @@ public class SpellCorrection {
 			
 			clearStringBuffer(inputString);
 			newWord.deleteCharAt(j);
-			if (set.contains(newWord.toString())) {
+			if (dictionarySet.contains(newWord.toString())) {
 		
 				correctSpelling = newWord.toString();
 				returnList.add(correctSpelling);
@@ -88,7 +88,7 @@ public class SpellCorrection {
 			newWord.setCharAt(i + 1, leftChar);
 			
 			
-			if (set.contains(newWord.toString())) {
+			if (dictionarySet.contains(newWord.toString())) {
 				
 				correctSpelling = newWord.toString();
 				returnList.add(correctSpelling);

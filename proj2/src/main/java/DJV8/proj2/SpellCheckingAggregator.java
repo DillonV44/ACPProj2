@@ -10,26 +10,30 @@ public class SpellCheckingAggregator {
 	
 	
 	private String correctSpelling;
-	private Set<String> set;
+	private Set<String> dictionarySet;
 	private DictionaryLoader dl;
 	private SpellCorrection spellCorrection;
 	private StringBuffer wordSuggestions;
+	private StringBuffer noSuggestionsBuffer;
 	
 	
 	
 	public SpellCheckingAggregator() {
 		
 		
-		set = new HashSet<>();
+		dictionarySet = new HashSet<>();
 		dl = new DictionaryLoader();
-		set = dl.getDictionarySet();
+		dictionarySet = dl.getDictionarySet();
 		correctSpelling = "";
 		spellCorrection = new SpellCorrection();
 		wordSuggestions = new StringBuffer();
+		noSuggestionsBuffer = new StringBuffer();
+		
 	}
 	
 	public void clearBuffer() {
 		this.wordSuggestions.setLength(0);
+		noSuggestionsBuffer.setLength(0);
 	}
 	
 	public String[] splitWordsFromFile(String inputString) {
@@ -48,10 +52,11 @@ public class SpellCheckingAggregator {
 		ArrayList<String> returnedItems = new ArrayList<>();
 		ArrayList<String> incorrectWords = new ArrayList<>();
 		ArrayList<String> suggestions = new ArrayList<>();
+		Boolean matchFound = false;
 		
 		
 		for (int i = 0; i < wordsFromFile.length; i ++) {
-			if (!set.contains(wordsFromFile[i])) {
+			if (!dictionarySet.contains(wordsFromFile[i])) {
 				incorrectWords.add(wordsFromFile[i]);
 			}
 			
@@ -64,6 +69,7 @@ public class SpellCheckingAggregator {
 			
 			wordSuggestions.append(incorretWordFromList + ": " );
 			
+			matchFound = false;
 			// one letter missing
 			
 			// Reset correctSpelling to empty 
@@ -76,6 +82,7 @@ public class SpellCheckingAggregator {
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling); 
 					wordSuggestions.append(correctSpelling + ", ");
+					matchFound = true;
 				}
 			}
 			
@@ -95,6 +102,7 @@ public class SpellCheckingAggregator {
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling);
 					wordSuggestions.append(correctSpelling + ", ");
+					matchFound = true;
 				}
 				
 			}
@@ -113,35 +121,48 @@ public class SpellCheckingAggregator {
 				if (correctSpelling != "" && !suggestions.contains(correctSpelling)) {
 					suggestions.add(correctSpelling);
 					wordSuggestions.append(correctSpelling + ", ");
+					matchFound = true;
 				}
 				
 			}
 			
+			if (!matchFound) {
+				populateNoMatchesFoundStringBuffer(incorretWordFromList);
+				wordSuggestions.append("No suggestions for this miss spelled word");
+				
+			}
+			
 			wordSuggestions.append("\n");
+			
+			
 			
 			correctSpelling = "";
 			returnedItems.clear();
 			
 		}
 		
-//		System.out.println(wordSuggestions.toString());
-		
-//		System.out.println(suggestions.size());
-//		for (int i = 0; i < suggestions.size(); i ++) {
-//			System.out.println(suggestions.get(i));
-//		}
+
 		return wordSuggestions;
 	}
 	
 	public boolean areThereIncorrectWords(String inputString, String[] wordsFromFile) {
 		boolean missspelledWords = false;
 		for (int i = 0; i < wordsFromFile.length; i ++) {
-			if (!set.contains(wordsFromFile[i])) {
+			if (!dictionarySet.contains(wordsFromFile[i])) {
 				missspelledWords = true;
 				
 			}
 		}
 		return missspelledWords;
+	}
+	
+	public void populateNoMatchesFoundStringBuffer(String noSuggestions) { 
+		System.out.println("Input this word " + noSuggestions);
+		noSuggestionsBuffer.append(noSuggestions + ", ");
+	}
+	
+	public StringBuffer getNoMatchesFound() {
+		return noSuggestionsBuffer; 
 	}
 	
 

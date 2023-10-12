@@ -85,16 +85,10 @@ public class SpellCheckerGUI extends Application {
 				
 				FileChooser fileChooser = new FileChooser();
                 fileChooser.setInitialDirectory(new File(".")); 
-				// set to current didrectory                
-//                String sep = System.getProperty("file.separator");
-	//			fileChooser.setInitialDirectory(new File("c:"+sep+"users"+sep+"jcoffey"));
-                //Show open file dialog
                 File file = fileChooser.showOpenDialog(null);
                 if(file != null) {
-                  System.out.println(file.getPath());
                   fileParser.setStringFromFile(file.getPath());
                   textFromFile = fileParser.getStringFromFile();
-                  System.out.println(textFromFile);
                   textArea.setWrapText(true);
                   textArea.setText(textFromFile);
                 }
@@ -107,7 +101,7 @@ public class SpellCheckerGUI extends Application {
 	private MenuItem saveFileItem() {
 		MenuItem saveFileItem = new MenuItem("Save File");
 		// Set Accelerator for Exit MenuItem.
-		saveFileItem.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+	
 		saveFileItem.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
@@ -122,7 +116,6 @@ public class SpellCheckerGUI extends Application {
 					try {
 						PrintWriter writer;
 						writer = new PrintWriter(file);
-						System.out.println(textArea.getText().toString());
 						writer.println(textArea.getText().toString());
 						writer.close();
 					} catch (IOException ex) {
@@ -136,8 +129,6 @@ public class SpellCheckerGUI extends Application {
 	
 	private MenuItem createExitItem() {
        MenuItem exitItem = new MenuItem("Exit");
-        // Set Accelerator for Exit MenuItem.
-       exitItem.setAccelerator(KeyCombination.keyCombination("Ctrl+X"));
        // When user click on the Exit item
        exitItem.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -162,22 +153,31 @@ public class SpellCheckerGUI extends Application {
 	           public void handle(ActionEvent event) {
 	        	   String[] wordsFromFile = spellCheckManager.splitWordsFromFile(textArea.getText());
 	        	   dialogBoxText = spellCheckManager.allSuggestedWords(wordsFromFile);
+	        	   StringBuffer noSuggestionsBuffer = spellCheckManager.getNoMatchesFound();
 	        	   if (!spellCheckManager.areThereIncorrectWords(textFromFile, wordsFromFile)) {
 	        		   dialogBoxText.append("All words are spelled correctly");
-	        		   System.out.println(dialogBoxText.toString());
 	        		   Alert allClearAlert = new Alert(AlertType.CONFIRMATION);
 	        		   allClearAlert.setTitle("Spell Checker");
 	        		   allClearAlert.setHeaderText("Good job");
 	        		   allClearAlert.setContentText("Nothing to fix");
 	        		   allClearAlert.show();
 	        	   }
+	        	   
 	        	   else {
-	        		   
-	        		   System.out.println(dialogBoxText.toString());
 	        		   Alert wordsToFix = new Alert(AlertType.CONFIRMATION);
 	        		   wordsToFix.setTitle("Spell Checker");
 	        		   wordsToFix.setHeaderText("Possible Corrections..");
 	        		   wordsToFix.setContentText(dialogBoxText.toString());
+	        		   
+						wordsToFix.showAndWait();
+					
+	        	   }
+	        	   if (noSuggestionsBuffer.toString() != "") {
+	        		   Alert wordsToFix = new Alert(AlertType.ERROR);
+	        		   wordsToFix.setTitle("Spell Checker");
+	        		   wordsToFix.setHeaderText("There are no possible matches for the following words");
+	        		   System.out.println(noSuggestionsBuffer.toString());
+	        		   wordsToFix.setContentText(noSuggestionsBuffer.toString());
 	        		   wordsToFix.show();
 	        	   }
 	        	   spellCheckManager.clearBuffer();
