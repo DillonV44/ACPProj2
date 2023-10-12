@@ -1,0 +1,1 @@
+Hello. My plan is to bofa have a test file that has UPPer and LOWER case words. All three cases of misspellings will be represented. The file will encompass more than one line and will have no other punctuation than commas, and the dot at the end of a line. shebs
